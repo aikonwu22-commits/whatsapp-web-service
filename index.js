@@ -1,11 +1,18 @@
 const express = require('express');
-const cors = require('cors');
+const cors = require('cors');const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+/ 添加 CORS 配置 - 重要！
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 // 获取所有聊天列表
 app.get('/chats', async (req, res) => {
   try {
