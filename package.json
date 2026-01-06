@@ -1,22 +1,11 @@
 {
   "name": "whatsapp-web-service",
   "version": "1.0.0",
-  "description": "WhatsApp Web API 服务 - 用于与 Lovable 应用集成",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js"
-  },
-  "dependencies": { 
-     "cors": "^2.8.5",
+  "dependencies": {
     "express": "^4.18.2",
     "whatsapp-web.js": "^1.23.0",
     "qrcode": "^1.5.3",
-    "cors": "^2.8.5",
-    "puppeteer": "^21.6.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "cors": "^2.8.5"
   }
 }
-
