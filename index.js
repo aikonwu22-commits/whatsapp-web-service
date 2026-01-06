@@ -6,6 +6,35 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const app = express();
 app.use(cors());
 app.use(express.json());
+// 获取所有聊天列表
+app.get('/chats', async (req, res) => {
+  try {
+    if (!client || !client.info) {
+      return res.status(503).json({ error: 'WhatsApp 未连接' });
+    }
+    
+    // 使用 whatsapp-web.js 的 getChats() 方法获取所有聊天
+    const chats = await client.getChats();
+    
+    // 格式化返回数据
+    const formattedChats = chats.map(chat => ({
+      id: chat.id._serialized,
+      name: chat.name || chat.pushname || chat.id.user,
+      isGroup: chat.isGroup,
+      unreadCount: chat.unreadCount || 0,
+      lastMessage: chat.lastMessage ? {
+        body: chat.lastMessage.body,
+        timestamp: chat.lastMessage.timestamp,
+        fromMe: chat.lastMessage.fromMe
+      } : null
+    }));
+    
+    res.json(formattedChats);
+  } catch (error) {
+    console.error('获取聊天列表失败:', error);
+    res.status(500).json({ error: '获取聊天列表失败' });
+  }
+});
 
 // 状态变量
 let qrCodeData = null;
