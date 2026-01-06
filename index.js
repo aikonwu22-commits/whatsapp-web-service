@@ -252,6 +252,8 @@ app.post('/send', async (req, res) => {
     }
     
     res.json({ success: true, message: '消息发送成功' });
+
+    
   } catch (error) {
     console.error('发送失败:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -273,6 +275,61 @@ app.post('/logout', async (req, res) => {
 // ============ 启动服务 ============
 
 const PORT = process.env.PORT || 3000;
+// ========== 添加到你的 Express 服务中 ==========
+
+// 获取所有聊天列表
+app.get('/chats', async (req, res) => {
+  try {
+    if (!client || !client.info) {
+      return res.status(503).json({ error: 'WhatsApp 未连接' });
+    }
+    
+    const chats = await client.getChats();
+    
+    const formattedChats = chats.map(chat => ({
+      id: chat.id._serialized,
+      name: chat.name || chat.pushname || chat.id.user,
+      isGroup: chat.isGroup,
+      unreadCount: chat.unreadCount || 0,
+      lastMessage: chat.lastMessage ? {
+        body: chat.lastMessage.body,
+        timestamp: chat.lastMessage.timestamp,
+        fromMe: chat.lastMessage.fromMe
+      } : null
+    }));
+    
+    res.json(formattedChats);
+  } catch (error) {
+    console.error('获取聊天列表失败:', error);
+    res.status(500).json({ error: '获取聊天列表失败' });
+  }
+});
+
+// 获取指定聊天的历史消息 (可选)
+app.get('/chats/:chatId/messages', async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const limit = parseInt(req.query.limit) || 50;
+    
+    const chat = await client.getChatById(chatId);
+    const messages = await chat.fetchMessages({ limit });
+    
+    const formattedMessages = messages.map(msg => ({
+      id: msg.id._serialized,
+      body: msg.body,
+      timestamp: msg.timestamp,
+      fromMe: msg.fromMe,
+      from: msg.from,
+      to: msg.to,
+      hasMedia: msg.hasMedia
+    }));
+    
+    res.json(formattedMessages);
+  } catch (error) {
+    console.error('获取消息失败:', error);
+    res.status(500).json({ error: '获取消息失败' });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`🚀 WhatsApp Web 服务已启动，端口: ${PORT}`);
