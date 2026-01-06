@@ -1,5 +1,6 @@
 const express = require('express');
-const cors = require('cors');const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
+const cors = require('cors');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 
