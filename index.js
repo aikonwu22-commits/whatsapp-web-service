@@ -223,16 +223,32 @@ app.post('/webhook', (req, res) => {
 
 // 发送消息
 app.post('/send', async (req, res) => {
-  const { to, message, mediaUrl } = req.body;
-  
-  if (clientStatus !== 'connected') {
-    return res.status(400).json({
-      success: false,
-      error: 'WhatsApp 客户端未连接'
-    });
-  }
-  
   try {
+    const { to, message, mediaUrl } = req.body;
+    
+    console.log('Sending message to:', to);
+    
+    // 使用 getContactById 和 getChat 解决 LID 问题
+    const contact = await client.getContactById(to);
+    const chat = await contact.getChat();
+    
+    let result;
+    if (mediaUrl) {
+      const { MessageMedia } = require('whatsapp-web.js');
+      const media = await MessageMedia.fromUrl(mediaUrl);
+      result = await chat.sendMessage(media, { caption: message });
+    } else {
+      result = await chat.sendMessage(message);
+    }
+    
+    console.log('Message sent successfully:', result.id._serialized);
+    res.json({ success: true, messageId: result.id._serialized });
+  } catch (error) {
+    console.error('Send error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
     // 格式化电话号码
     let formattedNumber = to.replace(/\D/g, '');
     if (!formattedNumber.includes('@c.us')) {
